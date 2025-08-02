@@ -42,9 +42,9 @@ func main() {
 		}
 	}
 
-	test := DownScaleImage(newImageSet, newImageSet.Bounds().Max.X / 3, newImageSet.Bounds().Max.Y / 3) // 
+	test := ScaleImage(newImageSet, newImageSet.Bounds().Max.X / 3, newImageSet.Bounds().Max.Y / 3) 
 	
-	outFile, err := os.Create("./img/testResult1.jpg")
+	outFile, err := os.Create("./img/testResult2.jpg")
 
 	if err != nil {
 		log.Fatal(err)
@@ -63,16 +63,16 @@ func main() {
 	fmt.Print("Done")
 }
 
-func DownScaleImage(img *image.RGBA, targetWidthScale int, targetHeightScale int) *image.RGBA {
+func ScaleImage(img *image.RGBA, targetWidthScale int, targetHeightScale int) *image.RGBA {
 	imageScale := image.NewRGBA(image.Rect(0,0, targetWidthScale, targetHeightScale)) // Create New Predefined Empty Image
 
-	Sx := float64(img.Bounds().Max.X / targetWidthScale) // Scale X Value
-	Sy := float64(img.Bounds().Max.Y / targetHeightScale) // Scale Y Value
+	Sx := float64(img.Bounds().Max.X) / float64(targetWidthScale) // Scale X Value
+	Sy := float64(img.Bounds().Max.Y) / float64(targetHeightScale) // Scale Y Value
 
 	for y := 0; y < targetHeightScale; y++ {
 		for x := 0; x < targetWidthScale; x++ {
-			originalX := float64(Sx * float64(x)) // Which X Position are in Original X
-			originalY := float64(Sy * float64(y)) // Which Y Position Are in Original Y
+			originalX := Sx * float64(x) // Which X Position are in Original X
+			originalY := Sy * float64(y) // Which Y Position Are in Original Y
 
 			roundedX := int(math.RoundToEven(originalX)) // Round the value (Nearest Neighbor)
 			roundedY := int(math.RoundToEven(originalY)) // Round the value (Nearest Neighbot)
