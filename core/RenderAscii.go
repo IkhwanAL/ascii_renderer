@@ -4,21 +4,16 @@ import (
 	"fmt"
 	"image"
 )
-
 const DENSITY = " .:-=+*#%@"
+// const DENSITY = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
 
-func RenderToAscii(img *image.RGBA) {
-	for y := range img.Bounds().Max.Y {
-		for x := range img.Bounds().Max.X {
-			pix := img.At(x, y)
+func RenderToAscii(img *image.Gray) {
+	for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
+		for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
 
-			r, g, b, _ := pix.RGBA()
-			
-			// Luminense Something algorithm math calculation
-			grey := (19595*r) + (38740*g) * (7471*b) + (1 << 15) >> 24
-			grey8 := uint8(grey)
-			
-			density_index := int(grey8) * (len(DENSITY) - 1) / 255
+			grey := img.GrayAt(x, y)
+
+			density_index := int(grey.Y) * (len(DENSITY) - 1) / 255
 			character := DENSITY[density_index]
 			fmt.Printf("%s",string(character))
 		}

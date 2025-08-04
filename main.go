@@ -16,7 +16,7 @@ import (
 
 func main() {
 	// TODO Get Image
-	imgPath := "./img/dice_5.png"
+	imgPath := "./img/lorem.png"
 	
 	reader, err := os.Open(imgPath)
 
@@ -34,10 +34,10 @@ func main() {
 
 	bounds := img.Bounds()
 	
-	newImageSet := image.NewRGBA(bounds)
+	newImageSet := image.NewGray(bounds)
 	
-	for y := 0; y < bounds.Max.Y; y++ {
-		for x := 0; x < bounds.Max.X; x++ {
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			oldPixel := img.At(x, y)
 			pixel := color.GrayModel.Convert(oldPixel)
 			newImageSet.Set(x, y, pixel)
@@ -67,8 +67,8 @@ func main() {
 
 }
 
-func ScaleImage(img *image.RGBA, targetWidthScale int, targetHeightScale int) *image.RGBA {
-	imageScale := image.NewRGBA(image.Rect(0,0, targetWidthScale, targetHeightScale)) // Create New Predefined Empty Image
+func ScaleImage(img *image.Gray, targetWidthScale int, targetHeightScale int) *image.Gray {
+	imageScale := image.NewGray(image.Rect(0,0, targetWidthScale, targetHeightScale)) // Create New Predefined Empty Image
 
 	Sx := float64(img.Bounds().Max.X) / float64(targetWidthScale) // Scale X Value
 	Sy := float64(img.Bounds().Max.Y) / float64(targetHeightScale) // Scale Y Value
