@@ -10,11 +10,13 @@ import (
 	"image/color"
 	"image/jpeg"
 	_ "image/png"
+
+	"github.com/ikhwanal/ascii_renderer/core"
 )
 
 func main() {
 	// TODO Get Image
-	imgPath := "./img/secondTest.jpg"
+	imgPath := "./img/dice_5.png"
 	
 	reader, err := os.Open(imgPath)
 
@@ -31,9 +33,9 @@ func main() {
 	}
 
 	bounds := img.Bounds()
-
+	
 	newImageSet := image.NewRGBA(bounds)
-
+	
 	for y := 0; y < bounds.Max.Y; y++ {
 		for x := 0; x < bounds.Max.X; x++ {
 			oldPixel := img.At(x, y)
@@ -42,9 +44,9 @@ func main() {
 		}
 	}
 
-	test := ScaleImage(newImageSet, newImageSet.Bounds().Max.X / 3, newImageSet.Bounds().Max.Y / 3) 
-	
-	outFile, err := os.Create("./img/testResult2.jpg")
+	// newImageSet = ScaleImage(newImageSet, bounds.Bounds().Max.X / 3, bounds.Bounds().Max.Y / 3) 
+  newImageSet = ScaleImage(newImageSet, 80, 40)
+	outFile, err := os.Create("./img/testResult1.jpg")
 
 	if err != nil {
 		log.Fatal(err)
@@ -52,15 +54,17 @@ func main() {
 
 	defer outFile.Close()
 
-	err = jpeg.Encode(outFile, test, nil)
+	err = jpeg.Encode(outFile, newImageSet, nil)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Width  : %d, To %d \n", bounds.Max.X, test.Bounds().Max.X)
-	fmt.Printf("Height : %d, T0 %d \n", bounds.Max.Y, test.Bounds().Max.Y)
-	fmt.Print("Done")
+	core.RenderToAscii(newImageSet)
+	fmt.Printf("Width  : %d, To %d \n", bounds.Max.X, newImageSet.Bounds().Max.X)
+	fmt.Printf("Height : %d, T0 %d \n", bounds.Max.Y, newImageSet.Bounds().Max.Y)
+	fmt.Print("Done\n")
+
 }
 
 func ScaleImage(img *image.RGBA, targetWidthScale int, targetHeightScale int) *image.RGBA {
