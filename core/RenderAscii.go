@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"image"
 )
-const DENSITY = " .:-=+*#%@"
+// const DENSITY = " .:-=+*#%@"
 // const DENSITY = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
+const DENSITY = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
 
 func RenderToAscii(img *image.Gray) {
 	for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
