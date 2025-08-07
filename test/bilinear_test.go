@@ -58,56 +58,56 @@ func imagesIdentical(img1, img2 *image.Gray) bool {
 	return true
 }
 
-// ////To Make Sure Not Crash The App If We Choose To Scale Aggresively
-// func TestScaleBoundaryImage(t *testing.T) {
-// 	img := createTestImage(10, 10)
-//
-// 	result := core.BiliniarScale(img, 50, 50) // Scale up
-// 	if result == nil {
-// 		t.Fatal("Scaling up should not crash")
-// 	}
-//
-// 	result = core.BiliniarScale(img, 3, 3) // Scale down to very small
-// 	if result == nil {
-// 		t.Fatal("Scaling to tiny size should not crash")
-// 	}
-//
-// 	result = core.BiliniarScale(img, 1, 1) // Edge case: 1x1
-// 	if result == nil {
-// 		t.Fatal("Scaling to 1x1 should not crash")
-// 	}
-// }
-//
-// ////A Normal Test Just To make Sure Bilinear Work Fine Generally
-// func TestBilinearSmoke(t *testing.T) {
-// 	// Create checkerboard pattern - sensitive to coordinate errors
-// 	img := createCheckerboard(20, 20)
-//
-// 	// Test multiple scale factors
-// 	scales := []int{5, 10, 40, 80} // Down, down, up, up
-//
-// 	for _, scale := range scales {
-// 		result := core.BiliniarScale(img, scale, scale)
-//
-// 		// Basic sanity checks
-// 		if result == nil {
-// 			t.Fatalf("Scale to %dx%d returned nil", scale, scale)
-// 		}
-//
-// 		// Does not give use a correct scale value
-// 		if result.Bounds().Dx() != scale || result.Bounds().Dy() != scale {
-// 			t.Fatalf("Scale to %dx%d gave wrong dimensions", scale, scale)
-// 		}
-//
-// 		// Should be different from nearest neighbor (unless very small)
-// 		if scale > 10 {
-// 			nearest := core.NearesetNeighborScale(img, scale, scale)
-// 			if imagesIdentical(result, nearest) {
-// 				t.Errorf("Bilinear identical to nearest neighbor at %dx%d", scale, scale)
-// 			}
-// 		}
-// 	}
-// }
+////To Make Sure Not Crash The App If We Choose To Scale Aggresively
+func TestScaleBoundaryImage(t *testing.T) {
+	img := createTestImage(10, 10)
+
+	result := core.BiliniarScale(img, 50, 50) // Scale up
+	if result == nil {
+		t.Fatal("Scaling up should not crash")
+	}
+
+	result = core.BiliniarScale(img, 3, 3) // Scale down to very small
+	if result == nil {
+		t.Fatal("Scaling to tiny size should not crash")
+	}
+
+	result = core.BiliniarScale(img, 1, 1) // Edge case: 1x1
+	if result == nil {
+		t.Fatal("Scaling to 1x1 should not crash")
+	}
+}
+
+////A Normal Test Just To make Sure Bilinear Work Fine Generally
+func TestBilinearSmoke(t *testing.T) {
+	// Create checkerboard pattern - sensitive to coordinate errors
+	img := createCheckerboard(20, 20)
+
+	// Test multiple scale factors
+	scales := []int{5, 10, 40, 80} // Down, down, up, up
+
+	for _, scale := range scales {
+		result := core.BiliniarScale(img, scale, scale)
+
+		// Basic sanity checks
+		if result == nil {
+			t.Fatalf("Scale to %dx%d returned nil", scale, scale)
+		}
+
+		// Does not give use a correct scale value
+		if result.Bounds().Dx() != scale || result.Bounds().Dy() != scale {
+			t.Fatalf("Scale to %dx%d gave wrong dimensions", scale, scale)
+		}
+
+		// Should be different from nearest neighbor (unless very small)
+		if scale > 10 {
+			nearest := core.NearesetNeighborScale(img, scale, scale)
+			if imagesIdentical(result, nearest) {
+				t.Errorf("Bilinear identical to nearest neighbor at %dx%d", scale, scale)
+			}
+		}
+	}
+}
 
 //// This Function Is To Test The Math Equation Are Correct
 func TestWeightDistribution(t *testing.T) {
