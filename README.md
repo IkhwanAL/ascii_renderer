@@ -7,7 +7,7 @@ A Converter From Image to Ascii Image
 The plan is to learn Data Structure & Algorithm Based On Project. But know change to how scaling image work
 
 few image manipulation that i want learn that is
-- Nearest Neighbor Interpolation
-- Bilinear Interpolation
-- Edge Detection
+- Nearest Neighbor Interpolation [Done]
+- Bilinear Interpolation [Done]
+- Edge Detection [Next]
 - Dithing
