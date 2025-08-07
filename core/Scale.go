@@ -2,10 +2,12 @@ package core
 
 import (
 	"image"
+	"image/color"
 	"math"
 )
 
-func ScaleImage(img *image.Gray, targetWidthScale int, targetHeightScale int) *image.Gray {
+// NearestNeighbor Logic
+func NearesetNeighborScale(img *image.Gray, targetWidthScale int, targetHeightScale int) *image.Gray {
 	imageScale := image.NewGray(image.Rect(0, 0, targetWidthScale, targetHeightScale)) // Create New Predefined Empty Image
 
 	Sx := float64(img.Bounds().Max.X) / float64(targetWidthScale)  // Scale X Value
@@ -30,4 +32,125 @@ func ScaleImage(img *image.Gray, targetWidthScale int, targetHeightScale int) *i
 	}
 
 	return imageScale
+}
+
+// Bilinear Interpolation
+func BiliniarScale(img *image.Gray, targetWidthScale int, targetHeightScale int) *image.Gray {
+	imageScale := image.NewGray(image.Rect(0, 0, targetWidthScale, targetHeightScale))
+
+	Sx := float64(img.Bounds().Max.X) / float64(targetWidthScale)  // Scale X Value
+	Sy := float64(img.Bounds().Max.Y) / float64(targetHeightScale) // Scale Y Value
+	// fmt.Printf("sx: %.2f\n", Sx)
+	// fmt.Printf("sy: %.2f\n", Sy)
+
+	for y := 0; y < targetHeightScale; y++ {
+		for x := 0; x < targetWidthScale; x++ {
+			// Possible Value Are Negative
+			// originalX := math.Max(0, Sx*(float64(x)+0.5) - 0.5) // Update Image Sampling Strategy
+			// originalY := math.Max(0, Sy*(float64(y)+0.5) - 0.5) // Update Image Sampling Strategy
+			originalX := math.Abs(Sx*(float64(x)+0.5) - 0.5) // Update Image Sampling Strategy
+			originalY := math.Abs(Sy*(float64(y)+0.5) - 0.5) // Update Image Sampling Strategy
+
+
+			x1 := int(math.Floor(originalX))
+			y1 := int(math.Floor(originalY))
+
+			x2 := min(x1+1, img.Bounds().Max.X-1)
+			y2 := min(y1+1, img.Bounds().Max.Y-1)
+
+			// fmt.Printf("x1: %d\n", x1)
+			// fmt.Printf("x2: %d\n", x2)
+			// fmt.Printf("y1: %d\n", y1)
+			// fmt.Printf("y2: %d\n", y2)
+			// fmt.Printf("oriX: %.4f\n", originalX)
+			// fmt.Printf("oriY: %.4f\n\n", originalY)
+
+			dx := originalX - float64(x1)
+			dy := originalY - float64(y1)
+
+			bilinear := BILINEAR_RGBA{
+				img: img,
+				x1:  x1,
+				x2:  x2,
+				y1:  y1,
+				y2:  y2,
+			}
+
+			gray := bilinear.ScaleGray(dx, dy)
+			// fmt.Printf("gray: %.4f\n\n", gray)
+
+			clr := color.Gray{
+				Y: uint8(math.Round(gray)),
+			}
+
+			imageScale.Set(x, y, clr)
+		}
+	}
+
+	return imageScale
+}
+
+type BILINEAR_RGBA struct {
+	img image.Image
+	x1  int
+	x2  int
+	y1  int
+	y2  int
+}
+
+func (b BILINEAR_RGBA) RGBA_TOP_LEFT_NODE() color.Color {
+	return b.img.At(b.x1, b.y1)
+}
+
+func (b BILINEAR_RGBA) RGBA_TOP_RIGHT_NODE() color.Color {
+	return b.img.At(b.x2, b.y1)
+}
+
+func (b BILINEAR_RGBA) RGBA_BOTTOM_LEFT_NODE() color.Color {
+	return b.img.At(b.x1, b.y2)
+}
+
+func (b BILINEAR_RGBA) RGBA_BOTTOM_RIGHT_NODE() color.Color {
+	return b.img.At(b.x2, b.y2)
+}
+
+func (rgba BILINEAR_RGBA) ScaleGray(dx float64, dy float64) float64 {
+	y1 := float64(rgba.img.(*image.Gray).GrayAt(rgba.x1, rgba.y1).Y)
+	y2 := float64(rgba.img.(*image.Gray).GrayAt(rgba.x2, rgba.y1).Y)
+	y3 := float64(rgba.img.(*image.Gray).GrayAt(rgba.x1, rgba.y2).Y)
+	y4 := float64(rgba.img.(*image.Gray).GrayAt(rgba.x2, rgba.y2).Y)
+
+	// fmt.Printf("y1: %.4f\n", y1)
+	// fmt.Printf("y2: %.4f\n", y2)
+	// fmt.Printf("y3: %.4f\n", y3)
+	// fmt.Printf("y4: %.4f\n", y4)
+	//
+	// fmt.Printf("dx: %.4f\n", dx)
+	// fmt.Printf("dy: %.4f\n", dy)
+
+	y := (y1 * ((1 - dx) * (1 - dy))) + (y2 * ((dx) * (1 - dy))) + (y3 * ((1 - dx) * (dy))) + (y4 * ((dx) * (dy)))
+
+	return y
+}
+
+func (rgba BILINEAR_RGBA) ScaleRGBA(dx float64, dy float64) (r, g, b, a float64) {
+	clr1 := rgba.RGBA_TOP_LEFT_NODE()
+	r1, g1, b1, a1 := clr1.RGBA()
+
+	clr2 := rgba.RGBA_TOP_RIGHT_NODE()
+	r2, g2, b2, a2 := clr2.RGBA()
+
+	clr3 := rgba.RGBA_BOTTOM_LEFT_NODE()
+	r3, g3, b3, a3 := clr3.RGBA()
+
+	clr4 := rgba.RGBA_BOTTOM_RIGHT_NODE()
+	r4, g4, b4, a4 := clr4.RGBA()
+
+	// Distribution Weight Of Value Between Four Nodes
+	r = (float64(r1) * ((1 - dx) * (1 - dy))) + (float64(r2) * ((dx) * (1 - dy))) + (float64(r3) * ((1 - dx) * (dy))) + (float64(r4) * ((dx) * (dy)))
+	g = (float64(g1) * ((1 - dx) * (1 - dy))) + (float64(g2) * ((dx) * (1 - dy))) + (float64(g3) * ((1 - dx) * (dy))) + (float64(g4) * ((dx) * (dy)))
+	b = (float64(b1) * ((1 - dx) * (1 - dy))) + (float64(b2) * ((dx) * (1 - dy))) + (float64(b3) * ((1 - dx) * (dy))) + (float64(b4) * ((dx) * (dy)))
+	a = (float64(a1) * ((1 - dx) * (1 - dy))) + (float64(a2) * ((dx) * (1 - dy))) + (float64(a3) * ((1 - dx) * (dy))) + (float64(a4) * ((dx) * (dy)))
+
+	return r, g, b, a
 }

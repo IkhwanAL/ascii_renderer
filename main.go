@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	"image"
-	"log"
-	"os"
 	"image/jpeg"
 	_ "image/png"
+	"log"
+	"math"
+	"os"
 
 	"github.com/ikhwanal/ascii_renderer/core"
 	"golang.org/x/term"
@@ -30,7 +31,7 @@ func getTerminalSize() (int, int, error) {
 
 func main() {
 	// TODO Get Image
-	imgPath := "./img/Weebs1.jpg"
+	imgPath := "./img/seventhTest.jpg"
 
 	reader, err := os.Open(imgPath)
 
@@ -40,6 +41,12 @@ func main() {
 
 	defer reader.Close()
 
+	w, h, err := getTerminalSize()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	img, _, err := image.Decode(reader)
 
 	if err != nil {
@@ -47,11 +54,10 @@ func main() {
 	}
 
 	bounds := img.Bounds()
-	
+
 	newImageSet := core.ConvertToGrayScale(img, bounds)
 
-	newImageSet = core.ScaleImage(newImageSet, bounds.Bounds().Max.X / 4, bounds.Bounds().Max.Y / 4) 
-	outFile, err := os.Create("./img/testResult1.jpg")
+	outFile, err := os.Create("./img/greyResult.jpg")
 
 	if err != nil {
 		log.Fatal(err)
@@ -65,9 +71,32 @@ func main() {
 		log.Fatal(err)
 	}
 
+	widthDivisor := float64(bounds.Bounds().Max.X) / float64(w)
+	
+	// Since Character Is Naturally Longer Than Pixel
+	heightDivisor := float64(bounds.Bounds().Max.Y) / float64(h*2)
+
+	finalDivisor := math.Round(max(widthDivisor, heightDivisor))
+
+	newImageSet = core.BiliniarScale(newImageSet, bounds.Bounds().Max.X/int(finalDivisor), bounds.Bounds().Max.Y/int(finalDivisor))
+	outFile, err = os.Create("./img/scaleResult.jpg")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer outFile.Close()
+
+	err = jpeg.Encode(outFile, newImageSet, nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// return
 	core.RenderToAscii(newImageSet)
-	fmt.Printf("Width  : %d, To %d \n", bounds.Max.X, newImageSet.Bounds().Max.X)
-	fmt.Printf("Height : %d, T0 %d \n", bounds.Max.Y, newImageSet.Bounds().Max.Y)
+	fmt.Printf("Width  : %d, To %d Max %d\n", bounds.Max.X, newImageSet.Bounds().Max.X, w)
+	fmt.Printf("Height : %d, T0 %d Max %d\n", bounds.Max.Y, newImageSet.Bounds().Max.Y, h)
 	fmt.Print("Done\n")
 
 }

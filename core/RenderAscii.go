@@ -6,6 +6,7 @@ import (
 )
 // const DENSITY = " .:-=+*#%@"
 // const DENSITY = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
+// Sort By The Brigest To The Darkest Color
 const DENSITY = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
 
 func RenderToAscii(img *image.Gray) {
