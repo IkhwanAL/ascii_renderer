@@ -22,7 +22,6 @@ func getTerminalSize() (int, int, error) {
 
 	width, height, err := term.GetSize(fd)
 	if err != nil {
-		fmt.Print("Handle")
 		return 80, 25, err
 	}
 

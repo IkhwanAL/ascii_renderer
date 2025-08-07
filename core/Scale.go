@@ -38,19 +38,19 @@ func NearesetNeighborScale(img *image.Gray, targetWidthScale int, targetHeightSc
 func BiliniarScale(img *image.Gray, targetWidthScale int, targetHeightScale int) *image.Gray {
 	imageScale := image.NewGray(image.Rect(0, 0, targetWidthScale, targetHeightScale))
 
-	Sx := float64(img.Bounds().Max.X) / float64(targetWidthScale)  // Scale X Value
-	Sy := float64(img.Bounds().Max.Y) / float64(targetHeightScale) // Scale Y Value
+	maxX := float64(img.Bounds().Max.X)
+	maxY := float64(img.Bounds().Max.Y)
+
+	Sx := maxX / float64(targetWidthScale)  // Scale X Value
+	Sy := maxY / float64(targetHeightScale) // Scale Y Value
 	// fmt.Printf("sx: %.2f\n", Sx)
 	// fmt.Printf("sy: %.2f\n", Sy)
 
 	for y := 0; y < targetHeightScale; y++ {
 		for x := 0; x < targetWidthScale; x++ {
 			// Possible Value Are Negative
-			// originalX := math.Max(0, Sx*(float64(x)+0.5) - 0.5) // Update Image Sampling Strategy
-			// originalY := math.Max(0, Sy*(float64(y)+0.5) - 0.5) // Update Image Sampling Strategy
-			originalX := math.Abs(Sx*(float64(x)+0.5) - 0.5) // Update Image Sampling Strategy
-			originalY := math.Abs(Sy*(float64(y)+0.5) - 0.5) // Update Image Sampling Strategy
-
+			originalX := math.Max(0, math.Min(maxX - 1, Sx*(float64(x)+0.5)-0.5)) // Update Image Sampling Strategy
+			originalY := math.Max(0, math.Min(maxY - 1, Sy*(float64(y)+0.5)-0.5)) // Update Image Sampling Strategy
 
 			x1 := int(math.Floor(originalX))
 			y1 := int(math.Floor(originalY))
