@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/jpeg"
 	_ "image/png"
+	// "image/draw"
 	"log"
 	"math"
 	"os"
@@ -30,7 +31,7 @@ func getTerminalSize() (int, int, error) {
 
 func main() {
 	// TODO Get Image
-	imgPath := "./img/seventhTest.jpg"
+	imgPath := "./img/tenTest.jpg"
 
 	reader, err := os.Open(imgPath)
 
@@ -70,14 +71,36 @@ func main() {
 		log.Fatal(err)
 	}
 
+	newImageSet = core.EdgeDetection(*newImageSet)
+	outFile, err = os.Create("./img/edgeDetectionResult.jpg")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer outFile.Close()
+
+	err = jpeg.Encode(outFile, newImageSet, nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 	widthDivisor := float64(bounds.Bounds().Max.X) / float64(w)
-	
+
 	// Since Character Is Naturally Longer Than Pixel
 	heightDivisor := float64(bounds.Bounds().Max.Y) / float64(h*2)
 
 	finalDivisor := math.Round(max(widthDivisor, heightDivisor))
 
-	newImageSet = core.BiliniarScale(newImageSet, bounds.Bounds().Max.X/int(finalDivisor), bounds.Bounds().Max.Y/int(finalDivisor))
+	// test := image.NewRGBA(img.Bounds())
+	//
+	// draw.Draw(test, test.Bounds(), img, bounds.Min, draw.Src)
+
+	newImageSet = core.BilinearScaleGray(
+		newImageSet,
+		bounds.Bounds().Max.X/int(finalDivisor),
+		bounds.Bounds().Max.Y/int(finalDivisor),
+	)	
 	outFile, err = os.Create("./img/scaleResult.jpg")
 
 	if err != nil {
@@ -92,7 +115,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// return
 	core.RenderToAscii(newImageSet)
 	fmt.Printf("Width  : %d, To %d Max %d\n", bounds.Max.X, newImageSet.Bounds().Max.X, w)
 	fmt.Printf("Height : %d, T0 %d Max %d\n", bounds.Max.Y, newImageSet.Bounds().Max.Y, h)

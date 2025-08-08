@@ -62,17 +62,17 @@ func imagesIdentical(img1, img2 *image.Gray) bool {
 func TestScaleBoundaryImage(t *testing.T) {
 	img := createTestImage(10, 10)
 
-	result := core.BiliniarScale(img, 50, 50) // Scale up
+	result := core.BilinearScaleGray(img, 50, 50) // Scale up
 	if result == nil {
 		t.Fatal("Scaling up should not crash")
 	}
 
-	result = core.BiliniarScale(img, 3, 3) // Scale down to very small
+	result = core.BilinearScaleGray(img, 3, 3) // Scale down to very small
 	if result == nil {
 		t.Fatal("Scaling to tiny size should not crash")
 	}
 
-	result = core.BiliniarScale(img, 1, 1) // Edge case: 1x1
+	result = core.BilinearScaleGray(img, 1, 1) // Edge case: 1x1
 	if result == nil {
 		t.Fatal("Scaling to 1x1 should not crash")
 	}
@@ -87,7 +87,7 @@ func TestBilinearSmoke(t *testing.T) {
 	scales := []int{5, 10, 40, 80} // Down, down, up, up
 
 	for _, scale := range scales {
-		result := core.BiliniarScale(img, scale, scale)
+		result := core.BilinearScaleGray(img, scale, scale)
 
 		// Basic sanity checks
 		if result == nil {
@@ -118,7 +118,7 @@ func TestWeightDistribution(t *testing.T) {
     img.Set(0, 1, color.Gray{Y: 150})
     img.Set(1, 1, color.Gray{Y: 200})
     
-    result := core.BiliniarScale(img, 3, 3)
+    result := core.BilinearScaleGray(img, 3, 3)
  		   
     // Check that interpolated values are within reasonable bounds
     for y := 0; y < 3; y++ {

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -35,7 +36,7 @@ func NearesetNeighborScale(img *image.Gray, targetWidthScale int, targetHeightSc
 }
 
 // Bilinear Interpolation
-func BiliniarScale(img *image.Gray, targetWidthScale int, targetHeightScale int) *image.Gray {
+func BilinearScaleGray(img *image.Gray, targetWidthScale int, targetHeightScale int) *image.Gray {
 	imageScale := image.NewGray(image.Rect(0, 0, targetWidthScale, targetHeightScale))
 
 	maxX := float64(img.Bounds().Max.X)
@@ -49,21 +50,14 @@ func BiliniarScale(img *image.Gray, targetWidthScale int, targetHeightScale int)
 	for y := 0; y < targetHeightScale; y++ {
 		for x := 0; x < targetWidthScale; x++ {
 			// Possible Value Are Negative
-			originalX := math.Max(0, math.Min(maxX - 1, Sx*(float64(x)+0.5)-0.5)) // Update Image Sampling Strategy
-			originalY := math.Max(0, math.Min(maxY - 1, Sy*(float64(y)+0.5)-0.5)) // Update Image Sampling Strategy
+			originalX := math.Max(0, math.Min(maxX-1, Sx*(float64(x)+0.5)-0.5)) // Update Image Sampling Strategy
+			originalY := math.Max(0, math.Min(maxY-1, Sy*(float64(y)+0.5)-0.5)) // Update Image Sampling Strategy
 
 			x1 := int(math.Floor(originalX))
 			y1 := int(math.Floor(originalY))
 
 			x2 := min(x1+1, img.Bounds().Max.X-1)
 			y2 := min(y1+1, img.Bounds().Max.Y-1)
-
-			// fmt.Printf("x1: %d\n", x1)
-			// fmt.Printf("x2: %d\n", x2)
-			// fmt.Printf("y1: %d\n", y1)
-			// fmt.Printf("y2: %d\n", y2)
-			// fmt.Printf("oriX: %.4f\n", originalX)
-			// fmt.Printf("oriY: %.4f\n\n", originalY)
 
 			dx := originalX - float64(x1)
 			dy := originalY - float64(y1)
@@ -77,7 +71,6 @@ func BiliniarScale(img *image.Gray, targetWidthScale int, targetHeightScale int)
 			}
 
 			gray := bilinear.ScaleGray(dx, dy)
-			// fmt.Printf("gray: %.4f\n\n", gray)
 
 			clr := color.Gray{
 				Y: uint8(math.Round(gray)),
@@ -120,14 +113,6 @@ func (rgba BILINEAR_RGBA) ScaleGray(dx float64, dy float64) float64 {
 	y3 := float64(rgba.img.(*image.Gray).GrayAt(rgba.x1, rgba.y2).Y)
 	y4 := float64(rgba.img.(*image.Gray).GrayAt(rgba.x2, rgba.y2).Y)
 
-	// fmt.Printf("y1: %.4f\n", y1)
-	// fmt.Printf("y2: %.4f\n", y2)
-	// fmt.Printf("y3: %.4f\n", y3)
-	// fmt.Printf("y4: %.4f\n", y4)
-	//
-	// fmt.Printf("dx: %.4f\n", dx)
-	// fmt.Printf("dy: %.4f\n", dy)
-
 	y := (y1 * ((1 - dx) * (1 - dy))) + (y2 * ((dx) * (1 - dy))) + (y3 * ((1 - dx) * (dy))) + (y4 * ((dx) * (dy)))
 
 	return y
@@ -146,6 +131,11 @@ func (rgba BILINEAR_RGBA) ScaleRGBA(dx float64, dy float64) (r, g, b, a float64)
 	clr4 := rgba.RGBA_BOTTOM_RIGHT_NODE()
 	r4, g4, b4, a4 := clr4.RGBA()
 
+	// fmt.Printf("r1: %d\n", r1)
+	// fmt.Printf("r2: %d\n", r2)
+	// fmt.Printf("r3: %d\n", r3)
+	// fmt.Printf("r4: %d\n", r4)
+
 	// Distribution Weight Of Value Between Four Nodes
 	r = (float64(r1) * ((1 - dx) * (1 - dy))) + (float64(r2) * ((dx) * (1 - dy))) + (float64(r3) * ((1 - dx) * (dy))) + (float64(r4) * ((dx) * (dy)))
 	g = (float64(g1) * ((1 - dx) * (1 - dy))) + (float64(g2) * ((dx) * (1 - dy))) + (float64(g3) * ((1 - dx) * (dy))) + (float64(g4) * ((dx) * (dy)))
@@ -153,4 +143,65 @@ func (rgba BILINEAR_RGBA) ScaleRGBA(dx float64, dy float64) (r, g, b, a float64)
 	a = (float64(a1) * ((1 - dx) * (1 - dy))) + (float64(a2) * ((dx) * (1 - dy))) + (float64(a3) * ((1 - dx) * (dy))) + (float64(a4) * ((dx) * (dy)))
 
 	return r, g, b, a
+}
+
+func BilinearScaleRGBA(img *image.RGBA, targetWidthScale int, targetHeightScale int) *image.RGBA {
+	imageScale := image.NewRGBA(image.Rect(0, 0, targetWidthScale, targetHeightScale))
+
+	maxX := float64(img.Bounds().Max.X)
+	maxY := float64(img.Bounds().Max.Y)
+
+	Sx := maxX / float64(targetWidthScale)  // Scale X Value
+	Sy := maxY / float64(targetHeightScale) // Scale Y Value
+
+	for y := 0; y < targetHeightScale; y++ {
+		for x := 0; x < targetWidthScale; x++ {
+			// Possible Value Are Negative
+			originalX := math.Max(0, math.Min(maxX-1, Sx*(float64(x)+0.5)-0.5)) // Update Image Sampling Strategy
+			originalY := math.Max(0, math.Min(maxY-1, Sy*(float64(y)+0.5)-0.5)) // Update Image Sampling Strategy
+
+			x1 := int(math.Floor(originalX))
+			y1 := int(math.Floor(originalY))
+
+			x2 := min(x1+1, img.Bounds().Max.X-1)
+			y2 := min(y1+1, img.Bounds().Max.Y-1)
+
+			// fmt.Printf("x1: %d\n", x1)
+			// fmt.Printf("x2: %d\n", x2)
+			// fmt.Printf("y1: %d\n", y1)
+			// fmt.Printf("y2: %d\n", y2)
+			// fmt.Printf("oriX: %.4f\n", originalX)
+			// fmt.Printf("oriY: %.4f\n\n", originalY)
+
+			dx := originalX - float64(x1)
+			dy := originalY - float64(y1)
+
+			bilinear := BILINEAR_RGBA{
+				img: img,
+				x1:  x1,
+				x2:  x2,
+				y1:  y1,
+				y2:  y2,
+			}
+
+			r, g, b, a := bilinear.ScaleRGBA(dx, dy)
+			fmt.Printf("r: %.4f\n", r)
+			fmt.Printf("g: %.4f\n", g)
+			fmt.Printf("b: %.4f\n", b)
+			fmt.Printf("a: %.4f\n", a)
+			fmt.Printf("dx: %.4f\n", dx)
+			fmt.Printf("dy: %.4f\n\n", dy)
+
+			clr := color.RGBA64{
+				R: uint16(math.Round(r)),
+				G: uint16(math.Round(g)),
+				B: uint16(math.Round(b)),
+				A: uint16(math.Round(a)),
+			}
+
+			imageScale.Set(x, y, clr)
+		}
+	}
+
+	return imageScale
 }

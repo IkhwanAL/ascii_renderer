@@ -10,4 +10,5 @@ few image manipulation that i want learn that is
 - Nearest Neighbor Interpolation [Done]
 - Bilinear Interpolation [Done]
 - Edge Detection [Next]
-- Dithing
+- Galsium Blur
+- Dithering
