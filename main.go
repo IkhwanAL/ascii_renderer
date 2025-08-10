@@ -5,12 +5,14 @@ import (
 	"image"
 	"image/jpeg"
 	_ "image/png"
+
 	// "image/draw"
 	"log"
 	"math"
 	"os"
 
 	"github.com/ikhwanal/ascii_renderer/core"
+	"github.com/ikhwanal/ascii_renderer/utils"
 	"golang.org/x/term"
 )
 
@@ -57,82 +59,35 @@ func main() {
 
 	newImageSet := core.ConvertToGrayScale(img, bounds)
 
-	outFile, err := os.Create("./img/greyResult.jpg")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer outFile.Close()
-
-	err = jpeg.Encode(outFile, newImageSet, nil)
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	utils.OutputImageForDebugResult(newImageSet, "./img/greyResult.jpg")
 
 	edgeImg := core.EdgeDetection(*newImageSet)
-	outFile, err = os.Create("./img/edgeDetectionResult.jpg")
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer outFile.Close()
-
-	err = jpeg.Encode(outFile, edgeImg, nil)
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	utils.OutputImageForDebugResult(newImageSet, "./img/edgeDetectionResult.jpg")
+	
 	widthDivisor := float64(bounds.Bounds().Max.X) / float64(w)
 
-	// Since Character Is Naturally Longer Than Pixel
 	heightDivisor := float64(bounds.Bounds().Max.Y) / float64(h*2)
 
 	finalDivisor := math.Round(max(widthDivisor, heightDivisor))
-
-	// test := image.NewRGBA(img.Bounds())
-	//
-	// draw.Draw(test, test.Bounds(), img, bounds.Min, draw.Src)
 
 	newImageSet = core.BilinearScaleGray(
 		newImageSet,
 		bounds.Bounds().Max.X/int(finalDivisor),
 		bounds.Bounds().Max.Y/int(finalDivisor),
 	)
-	outFile, err = os.Create("./img/scaleResult.jpg")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer outFile.Close()
-
-	err = jpeg.Encode(outFile, newImageSet, nil)
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	
+	utils.OutputImageForDebugResult(newImageSet, "./img/scaleResult.jpg")
 
   edgeImg = core.MaxPoolingGray(
 		edgeImg,
 		bounds.Bounds().Max.X/int(finalDivisor),
 		bounds.Bounds().Max.Y/int(finalDivisor),
 	)
-	outFile, err = os.Create("./img/edgeImageScale.jpg")
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	defer outFile.Close()
+	utils.OutputImageForDebugResult(newImageSet, "./img/edgeImageScale.jpg")
 
-	err = jpeg.Encode(outFile, edgeImg, nil)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	return
-	core.RenderToAsciiWithEdgeContext(newImageSet, edgeImg)
+	core.RenderToAscii(newImageSet)
 	fmt.Printf("Width  : %d, To %d Max %d\n", bounds.Max.X, newImageSet.Bounds().Max.X, w)
 	fmt.Printf("Height : %d, T0 %d Max %d\n", bounds.Max.Y, newImageSet.Bounds().Max.Y, h)
 	fmt.Print("Done\n")
