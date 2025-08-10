@@ -1,10 +1,11 @@
 package core
 
 import (
-	"fmt"
+	// "fmt"	
 	"image"
 	"image/color"
 	"math"
+	"slices"
 )
 
 // NearestNeighbor Logic
@@ -44,8 +45,6 @@ func BilinearScaleGray(img *image.Gray, targetWidthScale int, targetHeightScale 
 
 	Sx := maxX / float64(targetWidthScale)  // Scale X Value
 	Sy := maxY / float64(targetHeightScale) // Scale Y Value
-	// fmt.Printf("sx: %.2f\n", Sx)
-	// fmt.Printf("sy: %.2f\n", Sy)
 
 	for y := 0; y < targetHeightScale; y++ {
 		for x := 0; x < targetWidthScale; x++ {
@@ -59,6 +58,7 @@ func BilinearScaleGray(img *image.Gray, targetWidthScale int, targetHeightScale 
 			x2 := min(x1+1, img.Bounds().Max.X-1)
 			y2 := min(y1+1, img.Bounds().Max.Y-1)
 
+			// Find Distribution Weigth Between To Point
 			dx := originalX - float64(x1)
 			dy := originalY - float64(y1)
 
@@ -113,7 +113,10 @@ func (rgba BILINEAR_RGBA) ScaleGray(dx float64, dy float64) float64 {
 	y3 := float64(rgba.img.(*image.Gray).GrayAt(rgba.x1, rgba.y2).Y)
 	y4 := float64(rgba.img.(*image.Gray).GrayAt(rgba.x2, rgba.y2).Y)
 
-	y := (y1 * ((1 - dx) * (1 - dy))) + (y2 * ((dx) * (1 - dy))) + (y3 * ((1 - dx) * (dy))) + (y4 * ((dx) * (dy)))
+	y := (y1 * ((1 - dx) * (1 - dy))) + 
+		(y2 * ((dx) * (1 - dy))) + 
+		(y3 * ((1 - dx) * (dy))) + 
+		(y4 * ((dx) * (dy)))
 
 	return y
 }
@@ -130,11 +133,6 @@ func (rgba BILINEAR_RGBA) ScaleRGBA(dx float64, dy float64) (r, g, b, a float64)
 
 	clr4 := rgba.RGBA_BOTTOM_RIGHT_NODE()
 	r4, g4, b4, a4 := clr4.RGBA()
-
-	// fmt.Printf("r1: %d\n", r1)
-	// fmt.Printf("r2: %d\n", r2)
-	// fmt.Printf("r3: %d\n", r3)
-	// fmt.Printf("r4: %d\n", r4)
 
 	// Distribution Weight Of Value Between Four Nodes
 	r = (float64(r1) * ((1 - dx) * (1 - dy))) + (float64(r2) * ((dx) * (1 - dy))) + (float64(r3) * ((1 - dx) * (dy))) + (float64(r4) * ((dx) * (dy)))
@@ -166,13 +164,6 @@ func BilinearScaleRGBA(img *image.RGBA, targetWidthScale int, targetHeightScale 
 			x2 := min(x1+1, img.Bounds().Max.X-1)
 			y2 := min(y1+1, img.Bounds().Max.Y-1)
 
-			// fmt.Printf("x1: %d\n", x1)
-			// fmt.Printf("x2: %d\n", x2)
-			// fmt.Printf("y1: %d\n", y1)
-			// fmt.Printf("y2: %d\n", y2)
-			// fmt.Printf("oriX: %.4f\n", originalX)
-			// fmt.Printf("oriY: %.4f\n\n", originalY)
-
 			dx := originalX - float64(x1)
 			dy := originalY - float64(y1)
 
@@ -185,13 +176,6 @@ func BilinearScaleRGBA(img *image.RGBA, targetWidthScale int, targetHeightScale 
 			}
 
 			r, g, b, a := bilinear.ScaleRGBA(dx, dy)
-			fmt.Printf("r: %.4f\n", r)
-			fmt.Printf("g: %.4f\n", g)
-			fmt.Printf("b: %.4f\n", b)
-			fmt.Printf("a: %.4f\n", a)
-			fmt.Printf("dx: %.4f\n", dx)
-			fmt.Printf("dy: %.4f\n\n", dy)
-
 			clr := color.RGBA64{
 				R: uint16(math.Round(r)),
 				G: uint16(math.Round(g)),
@@ -204,4 +188,53 @@ func BilinearScaleRGBA(img *image.RGBA, targetWidthScale int, targetHeightScale 
 	}
 
 	return imageScale
+}
+
+func MaxPoolingGray(img *image.Gray, targetWidthScale, targetHeightScale int) *image.Gray {
+
+	// It's Better To Make the Stride have a value of 2 ^ n
+	// This allowed to have Optimze with SIMD instruction
+	// This thing can be improved for later
+	strideY := int(img.Bounds().Max.Y / targetHeightScale)
+  strideX := int(img.Bounds().Max.X / targetWidthScale)
+
+	actualTargetWidth := int(img.Bounds().Max.X / strideX)
+	actualTargetHeight := int(img.Bounds().Max.Y / strideY)
+
+	imgScale := image.NewGray(image.Rect(0, 0, actualTargetWidth, actualTargetHeight))
+
+	kernel := make([]uint8, strideX*strideY)
+
+	// Step 1 Max Pooling Thing
+	for y := 0; y < imgScale.Bounds().Max.Y; y++ {
+		for x := 0; x < imgScale.Bounds().Max.X; x++ {
+
+			kernelStep := 0
+			startY := y * strideY
+			startX := x * strideX
+
+			endY := min(img.Bounds().Max.Y, startY + strideY)
+			endX := min(img.Bounds().Max.X, startX + strideX)
+
+			// Kernel Convolution / Spatial Pooling
+			for yy := startY; yy < endY; yy++ {
+				for xx := startX; xx < endX; xx++ {
+					gray := img.GrayAt(xx, yy).Y
+					kernel[kernelStep] = gray
+					kernelStep++
+				}
+			}
+
+			maxValue := slices.Max(kernel[:kernelStep])
+
+			imgScale.SetGray(x, y, color.Gray{Y: maxValue})
+			kernelStep = 0
+		}
+	}
+
+	if (targetHeightScale != actualTargetHeight) || (targetWidthScale != actualTargetWidth) {
+		imgScale = BilinearScaleGray(imgScale, targetHeightScale, targetHeightScale)
+	}
+
+	return imgScale
 }

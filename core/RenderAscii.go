@@ -22,3 +22,16 @@ func RenderToAscii(img *image.Gray) {
 		fmt.Println()
 	}
 }
+
+func RenderToAsciiWithEdgeContext(img *image.Gray, edgeImg *image.Gray) {
+	for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
+		for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
+			// gray := img.GrayAt(x, y)
+
+			edgeGray := edgeImg.GrayAt(x, y)
+
+			fmt.Printf("%d ", edgeGray.Y)
+		}
+		fmt.Println()
+	}
+}

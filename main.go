@@ -71,7 +71,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	newImageSet = core.EdgeDetection(*newImageSet)
+	edgeImg := core.EdgeDetection(*newImageSet)
 	outFile, err = os.Create("./img/edgeDetectionResult.jpg")
 
 	if err != nil {
@@ -80,7 +80,7 @@ func main() {
 
 	defer outFile.Close()
 
-	err = jpeg.Encode(outFile, newImageSet, nil)
+	err = jpeg.Encode(outFile, edgeImg, nil)
 
 	if err != nil {
 		log.Fatal(err)
@@ -100,9 +100,8 @@ func main() {
 		newImageSet,
 		bounds.Bounds().Max.X/int(finalDivisor),
 		bounds.Bounds().Max.Y/int(finalDivisor),
-	)	
+	)
 	outFile, err = os.Create("./img/scaleResult.jpg")
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -115,7 +114,25 @@ func main() {
 		log.Fatal(err)
 	}
 
-	core.RenderToAscii(newImageSet)
+  edgeImg = core.MaxPoolingGray(
+		edgeImg,
+		bounds.Bounds().Max.X/int(finalDivisor),
+		bounds.Bounds().Max.Y/int(finalDivisor),
+	)
+	outFile, err = os.Create("./img/edgeImageScale.jpg")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer outFile.Close()
+
+	err = jpeg.Encode(outFile, edgeImg, nil)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	return
+	core.RenderToAsciiWithEdgeContext(newImageSet, edgeImg)
 	fmt.Printf("Width  : %d, To %d Max %d\n", bounds.Max.X, newImageSet.Bounds().Max.X, w)
 	fmt.Printf("Height : %d, T0 %d Max %d\n", bounds.Max.Y, newImageSet.Bounds().Max.Y, h)
 	fmt.Print("Done\n")

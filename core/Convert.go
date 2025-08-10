@@ -3,8 +3,9 @@ package core
 import (
 	"image"
 	"image/color"
-	"image/draw"
 	"math"
+
+	"github.com/ikhwanal/ascii_renderer/utils"
 )
 
 func ConvertToGrayScale(img image.Image, bounds image.Rectangle) *image.Gray {
@@ -21,20 +22,20 @@ func ConvertToGrayScale(img image.Image, bounds image.Rectangle) *image.Gray {
 	return newImageSet
 }
 
-func allocNewArray(x0, y0 int) [][]float64 {
-	arr := make([][]float64, y0)
+func allocNewArray[V int | float64 | uint8](x0, y0 int) [][]V {
+	arr := make([][]V, y0)
 	for y := 0; y < y0; y++ {
-		arr[y] = make([]float64, x0)
+		arr[y] = make([]V, x0)
 	}
 
 	return arr
 }
 
 func EdgeDetection(img image.Gray) *image.Gray {
-	Gx := allocNewArray(img.Bounds().Dx(), img.Bounds().Dy())
-	Gy := allocNewArray(img.Bounds().Dx(), img.Bounds().Dy())
+	Gx := allocNewArray[float64](img.Bounds().Dx(), img.Bounds().Dy())
+	Gy := allocNewArray[float64](img.Bounds().Dx(), img.Bounds().Dy())
 
-	newPaddedImage := addPaddingImage(&img)
+	newPaddedImage := utils.AddPaddingImage(&img)
 
 	horintalKernelConvluation := [3][3]int{
 		{-1, 0, 1},
@@ -77,32 +78,6 @@ func EdgeDetection(img image.Gray) *image.Gray {
 	}
 
 	return imgGray
-}
-
-func addPaddingImage(img *image.Gray) *image.Gray {
-	newImg := image.NewGray(image.Rect(0, 0, img.Bounds().Dx()+2, img.Bounds().Dy()+2))
-
-	grayImage := image.Rect(1, 1, img.Bounds().Dx()+1, img.Bounds().Dy()+1)
-
-	draw.Draw(newImg, grayImage, img, img.Bounds().Min, draw.Src)
-
-	for x := 1; x < newImg.Bounds().Max.X-1; x++ {
-		topGrayColor := newImg.GrayAt(x, 1)
-		newImg.SetGray(x, 0, topGrayColor)
-
-		bottomGrayColor := newImg.GrayAt(x, newImg.Bounds().Max.Y-2)
-		newImg.SetGray(x, newImg.Bounds().Max.Y-1, bottomGrayColor)
-	}
-
-	for y := 0; y < newImg.Bounds().Max.Y; y++ {
-		leftGrayColor := newImg.GrayAt(1, y)
-		newImg.SetGray(0, y, leftGrayColor)
-
-		rightGrayColor := newImg.GrayAt(newImg.Bounds().Max.X-2, y)
-		newImg.SetGray(img.Bounds().Max.X-1, y, rightGrayColor)
-	}
-
-	return newImg
 }
 
 func EdgeCalculation(img *image.Gray, x, y int, kernelConvolution [3][3]int) float64 {
