@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"image"
-	"image/jpeg"
 	_ "image/png"
 
 	// "image/draw"
