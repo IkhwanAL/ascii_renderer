@@ -8,7 +8,7 @@ import (
 )
 
 func OutputImageForDebugResult(img image.Image, filePathName string) {
-	outFile, err := os.Create("./img/scaleResult.jpg")
+	outFile, err := os.Create(filePathName)
 	if err != nil {
 		log.Fatal(err)
 	}

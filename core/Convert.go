@@ -3,10 +3,20 @@ package core
 import (
 	"image"
 	"image/color"
+	"image/draw"
 	"math"
 
 	"github.com/ikhwanal/ascii_renderer/utils"
 )
+
+func AddDitheringAlgo(img image.Image) *image.Paletted {
+
+	newImg := image.NewPaletted(img.Bounds(), color.Palette{color.Black, color.White})
+
+	draw.FloydSteinberg.Draw(newImg, img.Bounds(), img, img.Bounds().Min)
+
+	return newImg
+}
 
 func ConvertToGrayScale(img image.Image, bounds image.Rectangle) *image.Gray {
 	newImageSet := image.NewGray(bounds)
@@ -18,7 +28,7 @@ func ConvertToGrayScale(img image.Image, bounds image.Rectangle) *image.Gray {
 			newImageSet.Set(x, y, pixel)
 		}
 	}
-
+	
 	return newImageSet
 }
 

@@ -190,13 +190,18 @@ func BilinearScaleRGBA(img *image.RGBA, targetWidthScale int, targetHeightScale 
 	return imageScale
 }
 
+// Value Return 2 ^ size
+func powerOf2N(size float64) int {
+	return int(math.Pow(float64(2), math.Log2(size)))
+} 
+
 func MaxPoolingGray(img *image.Gray, targetWidthScale, targetHeightScale int) *image.Gray {
 
 	// It's Better To Make the Stride have a value of 2 ^ n
 	// This allowed to have Optimze with SIMD instruction
 	// This thing can be improved for later
-	strideY := int(img.Bounds().Max.Y / targetHeightScale)
-  strideX := int(img.Bounds().Max.X / targetWidthScale)
+	strideY := powerOf2N(float64(img.Bounds().Max.Y) / float64(targetHeightScale))
+  strideX := powerOf2N(float64(img.Bounds().Max.X) / float64(targetWidthScale))
 
 	actualTargetWidth := int(img.Bounds().Max.X / strideX)
 	actualTargetHeight := int(img.Bounds().Max.Y / strideY)
