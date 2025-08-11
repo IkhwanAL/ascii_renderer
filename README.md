@@ -30,17 +30,6 @@ So i have to downscale the edge result image, try using bilinear failed, look at
 
 It Still Many Possiblity To Improve this Project which i don't know what algorirthm that i should use. And this project are lack of test(me just lazy create test that's all)
 
-### Rant
-for the Maxpooling part, that part ugh... its painful. soo many edge case to the point that i don't care anymore about the edge case, if the result are good, than it's good
-
-Here some tips for you: to start a side project start from small and improve it little by little without realizing you already create some many thing
-
-What do i learn from this all fun but painful:
-
-Image Processing it's Hard especially debugging this. And you know the boundary, making sure they using a correct pixel if not BOOM... failed. especially the image 1000 x 1000 ohh boy good luck finding incorrect pixel in 1.000.000 pixel. And sometimes you don't know if the result are correct because it's produce the result but your is math is ways off. i have to use AI to make sure the math is correct because seeing soo many "+-/*" 
-
-Well from all this rant i did quite enjoy this project, learn soo many thing, even forget what time is it. Usually when i code i just code for 1 - 2 hour, but since the project i build is intresting and fun without realizing it already 5+ hours.
-
 ### Algo
 Step By Step Algo:
 
@@ -62,5 +51,19 @@ New Terms for all search that i through:
 - Bicubic Interpolation
 - Dithering
 - Gaussian blur
-- Edge Detection
+- Edge Detection (Sobel Operator)
 - CNN (Convolution Neural Network)
+
+
+### Rant
+for the Maxpooling part, that part ugh... its painful. soo many edge case to the point that i don't care anymore about the edge case, if the result are good, than it's good
+
+Here some tips for you: to start a side project start from small and improve it little by little without realizing you already create some many thing
+
+What do i learn from this all fun but painful:
+
+Image Processing it's Hard especially debugging this. And you know the boundary, making sure they using a correct pixel if not BOOM... failed. especially the image 1000 x 1000 ohh boy good luck finding incorrect pixel in 1.000.000 pixel. And sometimes you don't know if the result are correct because it's produce the result but your is math is ways off. i have to use AI to make sure the math is correct because seeing soo many "+-/*" 
+
+Well from all this rant i did quite enjoy this project, learn soo many thing, even forget what time is it. Usually when i code i just code for 1 - 2 hour, but since the project i build is intresting and fun without realizing it already 5+ hours.
+
+
