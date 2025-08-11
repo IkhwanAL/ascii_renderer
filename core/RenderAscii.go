@@ -66,12 +66,16 @@ func getCorrespondingEdgeMagnitude(edgeImg *image.Gray, variantInput float64) fl
 	return meanMagnitude + (variantInput * stdMagnitude)
 }
 
-// const DENSITY_CHARS = "$@B%8&WM#oahkbdpqwmZO0QLCJUYXzcvunxrjft()1?-_+~<>i!lI;:,\"^`'. "
-const DENSITY_CHARS = "@B$&%WM#8Q0OZboahkdqpwmzXYUJLCvxunrjft()/1?<>+~|-_il!I;:,^`'.\" "
-const EDGE_CHARS = ".,;:!?'\"()[]{}/<>\\|+=*#@";
+// Dark to Light
+// const DENSITY_CHARS = " .:-=+*#%@"
+// const EDGE_CHARS      = ".,:;!?\"')([]}{/<>\\|+=*#@"
+
+// Light to Dark
+const DENSITY_CHARS = "@%#*+=-:. "
+const EDGE_CHARS = "@#*+=|\\<>/}{][)(\"'?!:;,.";
 
 func RenderToAsciiWithEdgeContext(img *image.Gray, edgeImg *image.Gray) {
-	thresholdMagnitude := getCorrespondingEdgeMagnitude(edgeImg, 1)
+	thresholdMagnitude := getCorrespondingEdgeMagnitude(edgeImg, 1.5)
 
 	for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
 		for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {

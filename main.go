@@ -62,7 +62,7 @@ func main() {
 
 	edgeImg := core.EdgeDetection(*newImageSet)
 
-	utils.OutputImageForDebugResult(newImageSet, "./img/edgeDetectionResult.jpg")
+	utils.OutputImageForDebugResult(edgeImg, "./img/edgeDetectionResult.jpg")
 
 	widthDivisor := float64(bounds.Bounds().Max.X) / float64(w)
 
@@ -84,7 +84,7 @@ func main() {
 		bounds.Bounds().Max.Y/int(finalDivisor),
 	)
 
-	utils.OutputImageForDebugResult(newImageSet, "./img/edgeImageScale.jpg")
+	utils.OutputImageForDebugResult(edgeImg, "./img/edgeImageScale.jpg")
 
 	core.RenderToAsciiWithEdgeContext(newImageSet, edgeImg)
 	// core.RenderToAscii(newImageSet)
