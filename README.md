@@ -15,8 +15,7 @@ few image manipulation that i want learn that is
 - Dithering [Go already provide the algo]
 
 After Few Weeks Of Building This Little Side/Fun Project There are few thing i learn
-the word above like nearest neighbor or other it sound scary but with little of time it's not that difficult to implement
-(maybe part of it golang already provide the difficulty part and its the color)
+the word above like nearest neighbor or other it sound scary but with little of time it's not that difficult to implement (maybe part of it golang already provide the std package like image, color, etc)
 
 ## My notes
 My First Implementation are Convert An Image To GrayScale (Already exists in golang) and Use That GrayScale And DownScale (Nearest Neighbor) so it Appropriate for terminal and Render to ascii, there already pre-sorted character that we can use in internet using that. And get the index based on their brightness of their gray color. print it. 
