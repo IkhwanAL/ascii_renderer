@@ -1,11 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"image"
 	_ "image/png"
 
-	// "image/draw"
 	"log"
 	"math"
 	"os"
@@ -31,8 +31,19 @@ func getTerminalSize() (int, int, error) {
 }
 
 func main() {
-	// TODO Get Image
-	imgPath := "./img/tenTest.jpg"
+	var filePath string 
+
+	flag.StringVar(&filePath, "i", "", "Image To Process")
+
+	flag.Parse()
+
+	if filePath == "" {
+		fmt.Print("Cannot Bro")
+	}
+
+	imgPath := filePath
+
+	fmt.Println(imgPath)
 
 	reader, err := os.Open(imgPath)
 
