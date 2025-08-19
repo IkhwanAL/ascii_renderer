@@ -31,19 +31,17 @@ func getTerminalSize() (int, int, error) {
 }
 
 func main() {
-	var filePath string 
+	var filePath string
 
 	flag.StringVar(&filePath, "i", "", "Image To Process")
 
 	flag.Parse()
 
 	if filePath == "" {
-		fmt.Print("Cannot Bro")
+		fmt.Print("No Image To Play With")
 	}
 
 	imgPath := filePath
-
-	fmt.Println(imgPath)
 
 	reader, err := os.Open(imgPath)
 
@@ -67,17 +65,24 @@ func main() {
 
 	bounds := img.Bounds()
 
+	// ditherImg := core.AddDitheringAlgo(img)
+	// utils.OutputImageForDebugResult(ditherImg, "./img/ditheringResult.jpg")
+
 	newImageSet := core.ConvertToGrayScale(img, bounds)
 
 	utils.OutputImageForDebugResult(newImageSet, "./img/greyResult.jpg")
 
+	// newImageSet = core.GaussianBlur(newImageSet, 1)
+	//
+	// utils.OutputImageForDebugResult(newImageSet, "./img/gaussianBlurResult.jpg")
+	// return
 	edgeImg := core.EdgeDetection(*newImageSet)
 
 	utils.OutputImageForDebugResult(edgeImg, "./img/edgeDetectionResult.jpg")
 
-	widthDivisor := float64(bounds.Bounds().Max.X) / float64(w)
+	widthDivisor := float64(bounds.Bounds().Max.X) / float64(w*2)
 
-	heightDivisor := float64(bounds.Bounds().Max.Y) / float64(h*2)
+	heightDivisor := float64(bounds.Bounds().Max.Y) / float64(h)
 
 	finalDivisor := math.Round(max(widthDivisor, heightDivisor))
 
@@ -99,8 +104,8 @@ func main() {
 
 	core.RenderToAsciiWithEdgeContext(newImageSet, edgeImg)
 	// core.RenderToAscii(newImageSet)
-	fmt.Printf("Width  : %d, To %d Max %d\n", bounds.Max.X, newImageSet.Bounds().Max.X, w)
-	fmt.Printf("Height : %d, T0 %d Max %d\n", bounds.Max.Y, newImageSet.Bounds().Max.Y, h)
+	fmt.Printf("Original Width  : %d, To %d, With Max Window Size %d\n", bounds.Max.X, newImageSet.Bounds().Max.X, w)
+	fmt.Printf("Original Height : %d, T0 %d, With Max Window Size %d\n", bounds.Max.Y, newImageSet.Bounds().Max.Y, h)
 	fmt.Print("Done\n")
 
 }

@@ -23,23 +23,24 @@ few image manipulation that i want learn that is
 - Bilinear Interpolation [Done]
 - Bicubic Interpolation
 - Edge Detection [Done]
-- Gaussian blur
+- Gaussian blur -> [Current] (many article says do gaussian blur before edge detection)
 
 After Few Weeks Of Building This Little Side/Fun Project There are few thing i learn
 the word above like nearest neighbor or other it sound scary but with little of time it's not that difficult to implement (maybe part of it golang already provide the std package like image, color, etc)
 
-## My notes
-My First Implementation are Convert An Image To GrayScale (Already exists in golang) and Use That GrayScale And DownScale (Nearest Neighbor) so it Appropriate for terminal and Render to ascii, there already pre-sorted character that we can use in internet using that. And get the index based on their brightness of their gray color. print it. 
+## Step By Step Journey
+I Start From Something Simple Get The Image, convert to grayscale, Scale Down Using Simplest Algorithm and Render To Ascii Took Me 1 Week To Complete. I Get The Result, An Satisfied with the result
 
-After completed it i increase the difficulty by using Bilinear Interpolation for image scale which instead of using 2 node in liniear interpolation we increase to 4 node it mean 2 linear interpolation (future me probaly thinking add other interpolation called bicubic interpolation which using 16 node (4 linear interpolation)) after that quick test the result sucess. 
+And than i continue to Other Scale Algorithm called Bilinear Algorithm took me 2 days to understand and i get the result the scale are much better than previous algo and render the result I Satisfied with the Result
 
-After that i increase the difficult by adding edge detection, to be honest in edge detection this is the part that i need a lot of learning like what is kernel convolution, what is filter, etc. 
+And i try to continue again but instead new algo for Scaling, its adding edge detection, the idea for edge detection are from AI itself when i asked what can i improve in this project and it give me edge detection. it took 1 days but with the help of Computerphile video and some AI that assist me find the basic fundemantal for web (finding in article one by one it's hassle to do and since it's edge detection which well know knowledge it wont hallucinate, right....?) for this edge detection i get the result but its not done yet. in need to scale down the edge detection image, but why i do that instead. Why i dont scale down than edge detection will it quite simple scaling mean information, so when down scaling mean remove some information for edge detection you need to complete information if not the result will not what you expect it possible but the detection you got will be lossy or a mess.
 
-Which i manage successfully implemented the edge detection, but there's the problem down scale image mean losing pixel information and i can't get the edge result if image are losing color precision. so i should get edge result before downscale img, which invite another problem how do i render these two different size of image where the grayscale is downscaled but the edge result image is not. 
+Which is why edege detecion first and than down scale, but to down scale edge detection image are little bit different i try to use usually scale like bilinear interpolation the result are messed. So i try to asked AI downscale for edge detection it's called Maxpooling. it took almost few (i forget how many days) days just for this to complete and i get the result. I Satisfied with the result
 
-So i have to downscale the edge result image, try using bilinear failed, look at google, ask an AI, and the result is using MaxPooling another downscale just for edge detection image. another logic to create but eventually success. Now im confusing how the program know to render from those two image, after few hours, i should use threshold and mean to determine that if the edge is to thin render normally if not render with list of edge character. 
+Next how to combine both scale down image and scale down edge image. Previously we just need scale down image to render to ascii, now we need both scaled down image and scale down edge image. first i need to know to tell the program this pixel have a strong edge color so we render this way if its not we render different way. So what we need are threshold that if lets says if the edge color above equal 150 (number can anything or use some wakey way to get number dynamimcally) and less than 255 (max gray color) if its more than than 150 it's an edge, else not an edge.
 
-It Still Many Possiblity To Improve this Project which i don't know what algorirthm that i should use. And this project are lack of test(me just lazy create test that's all)
+I Still Planning to improve this project because after a little research there still many way to process image and right now i have minim test(too lazy to add). Maybe i should add test, the test probably making sure the math correct, there will be no border problem. Because to tell the truth too many test make me more lazy to develop it became a burden instead of helpful
+
 
 ### Algo
 Step By Step Algo:

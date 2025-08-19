@@ -1,16 +1,17 @@
 package core
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
+	"log"
 	"math"
 
 	"github.com/ikhwanal/ascii_renderer/utils"
 )
 
 func AddDitheringAlgo(img image.Image) *image.Paletted {
-
 	newImg := image.NewPaletted(img.Bounds(), color.Palette{color.Black, color.White})
 
 	draw.FloydSteinberg.Draw(newImg, img.Bounds(), img, img.Bounds().Min)
@@ -28,7 +29,7 @@ func ConvertToGrayScale(img image.Image, bounds image.Rectangle) *image.Gray {
 			newImageSet.Set(x, y, pixel)
 		}
 	}
-	
+
 	return newImageSet
 }
 
@@ -59,20 +60,20 @@ func EdgeDetection(img image.Gray) *image.Gray {
 		{1, 2, 1},
 	}
 
-	for y := newPaddedImage.Bounds().Min.Y + 1; y < newPaddedImage.Bounds().Max.Y - 1; y++ {
-		for x := newPaddedImage.Bounds().Min.X + 1; x < newPaddedImage.Bounds().Max.X - 1; x++ {
+	for y := newPaddedImage.Bounds().Min.Y + 1; y < newPaddedImage.Bounds().Max.Y-1; y++ {
+		for x := newPaddedImage.Bounds().Min.X + 1; x < newPaddedImage.Bounds().Max.X-1; x++ {
 			horizontal := EdgeCalculation(newPaddedImage, x, y, horintalKernelConvluation)
 
 			Gx[y-1][x-1] = horizontal
 
-			vertical := EdgeCalculation(newPaddedImage,x, y, verticalKernelConvluation)
+			vertical := EdgeCalculation(newPaddedImage, x, y, verticalKernelConvluation)
 
 			Gy[y-1][x-1] = vertical
 
 		}
 	}
 
-	imgGray := image.NewGray(image.Rect(0,0, img.Bounds().Dx(), img.Bounds().Dy()))
+	imgGray := image.NewGray(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
 
 	for y := 0; y < img.Bounds().Dy(); y++ {
 		for x := 0; x < img.Bounds().Dx(); x++ {
@@ -109,7 +110,7 @@ func EdgeCalculation(img *image.Gray, x, y int, kernelConvolution [3][3]int) flo
 
 	middleLeft := int(pixelMiddleLeft) * kernelConvolution[1][0]
 	middleCenter := int(pixelMiddleCenter) * kernelConvolution[1][1]
-	middleRight := int(pixelMiddleRight) * kernelConvolution[1][2] 
+	middleRight := int(pixelMiddleRight) * kernelConvolution[1][2]
 
 	bottomLeft := int(pixelBottomLeft) * kernelConvolution[2][0]
 	bottomCenter := int(pixelBottomCenter) * kernelConvolution[2][1]
@@ -118,4 +119,51 @@ func EdgeCalculation(img *image.Gray, x, y int, kernelConvolution [3][3]int) flo
 	sumPix := float64((topLeft + topCenter + topRight + int(middleLeft) + int(middleCenter) + int(middleRight) + int(bottomLeft) + int(bottomCenter) + int(bottomRight))) / 9
 
 	return sumPix
+}
+
+func GaussianBlur(img *image.Gray, sigma float64) *image.Gray {
+	// newImg := image.NewGray(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
+
+	kernelSize := int(math.Floor(2*(3*sigma) + 1))
+	kernelGapFromCenter := int(math.Floor(float64(kernelSize) / 2))
+
+	kernelConvolution := allocNewArray[float64](kernelSize, kernelSize)
+
+	// fmt.Printf("%d \n\n", kernelSize)
+	sum := 0.0
+
+	for x := 0; x < kernelSize; x++ {
+		for y := 0; y < kernelSize; y++ {
+			xGap := x - kernelGapFromCenter
+			yGap := y - kernelGapFromCenter
+
+			// fmt.Printf("%d, %d \n", xGap, yGap)
+
+			gaussianFuncLeftSide := 1 / (2 * math.Pi * math.Pow(sigma, 2))
+
+			power := -(math.Pow(float64(xGap), 2) + math.Pow(float64(yGap), 2))
+
+			gaussianFuncRightSize := math.Pow(math.E, power/2*math.Pow(sigma, 2))
+
+			gaussianFuncResult := gaussianFuncLeftSide * gaussianFuncRightSize
+
+			kernelConvolution[x][y] = gaussianFuncResult
+
+			sum += gaussianFuncResult
+		}
+	}
+
+	fmt.Printf("Kernel %v \n", kernelConvolution)
+	fmt.Printf("Sum %.10f \n", sum)
+	
+	if sum != 1.0 {
+		log.Println("Do Normalaization To Make Sure it stays 1")
+		log.Fatal("the weight distribution for Gaussian Function is not equal 1 it means is not balance at all")
+	}
+
+	// fmt.Printf("Sum %.2f \n", sum)
+
+	// Edge Padding ??
+	paddedImg := utils.AddEdgePaddingExtenstion(img, kernelGapFromCenter, kernelGapFromCenter)
+	return paddedImg
 }

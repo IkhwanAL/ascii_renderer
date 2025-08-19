@@ -66,16 +66,21 @@ func getCorrespondingEdgeMagnitude(edgeImg *image.Gray, variantInput float64) fl
 	return meanMagnitude + (variantInput * stdMagnitude)
 }
 
-// Dark to Light
+// Light to Dark
 // const DENSITY_CHARS = " .:-=+*#%@"
 // const EDGE_CHARS      = ".,:;!?\"')([]}{/<>\\|+=*#@"
-
-// Light to Dark
-const DENSITY_CHARS = "@%#*+=-:. "
-const EDGE_CHARS = "@#*+=|\\<>/}{][)(\"'?!:;,.";
+// const POTRAIT_CHARS = "    ...:;Il1tfLCG08@"
+//
+// Dark to Light
+// const DENSITY_CHARS = "@%#*+=-:. "
+// const EDGE_CHARS = "@#*+=|\\<>/}{][)(\"'?!:;,.";
 
 func RenderToAsciiWithEdgeContext(img *image.Gray, edgeImg *image.Gray) {
-	thresholdMagnitude := getCorrespondingEdgeMagnitude(edgeImg, 1.5)
+	const DENSITY_CHARS = " .:-=+*#%@"
+	// const DENSITY_CHARS = "  ..''``^^\"\":;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao#MW&8%B@"
+	const EDGE_CHARS = ".,:;!?\"')([]}{/<>\\|+=*#@"
+
+	thresholdMagnitude := getCorrespondingEdgeMagnitude(edgeImg, 1.3)
 
 	for y := img.Bounds().Min.Y; y < img.Bounds().Max.Y; y++ {
 		for x := img.Bounds().Min.X; x < img.Bounds().Max.X; x++ {
@@ -87,7 +92,7 @@ func RenderToAsciiWithEdgeContext(img *image.Gray, edgeImg *image.Gray) {
 				character := EDGE_CHARS[edgeIndex]
 				fmt.Printf("%s", string(character))
 			} else {
-				densityIndex := int(math.Floor((float64(gray) / 255.0) * float64(len(DENSITY_CHARS) - 1)))
+				densityIndex := int(math.Floor((float64(gray) / 255.0) * float64(len(DENSITY_CHARS)-1)))
 				character := DENSITY_CHARS[densityIndex]
 				fmt.Printf("%s", string(character))
 			}
