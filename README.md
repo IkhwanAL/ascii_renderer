@@ -2,6 +2,18 @@
 
 A Converter From Image to Ascii Image
 
+## Example
+
+Image
+![Screenshoot](./docs/dice_5.png)
+
+Result
+![Screenshoot](./docs/result.png)
+
+## Command to run
+
+go run ./main.go -i path/to/file
+
 ## What is The Motivation of This Project
 
 The plan is to learn Data Structure & Algorithm Based On Project. And how scaling image work. And doing something fun to be able to see image in terminal instead pixel this is character (The Wonder Of Math)
@@ -12,7 +24,6 @@ few image manipulation that i want learn that is
 - Bicubic Interpolation
 - Edge Detection [Done]
 - Gaussian blur
-- Dithering [Go already provide the algo]
 
 After Few Weeks Of Building This Little Side/Fun Project There are few thing i learn
 the word above like nearest neighbor or other it sound scary but with little of time it's not that difficult to implement (maybe part of it golang already provide the std package like image, color, etc)
