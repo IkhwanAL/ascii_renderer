@@ -5,7 +5,6 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"log"
 	"math"
 
 	"github.com/ikhwanal/ascii_renderer/utils"
@@ -121,16 +120,27 @@ func EdgeCalculation(img *image.Gray, x, y int, kernelConvolution [3][3]int) flo
 	return sumPix
 }
 
-func GaussianBlur(img *image.Gray, sigma float64) *image.Gray {
-	// newImg := image.NewGray(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
+func GaussianBlur(img *image.Gray, sigma float64) (*image.Gray, error) {
 
-	kernelSize := int(math.Floor(2*(3*sigma) + 1))
-	kernelGapFromCenter := int(math.Floor(float64(kernelSize) / 2))
+	if img == nil {
+		return nil, fmt.Errorf("mage Is nil")
+	}
+
+	if sigma <= 0 {
+		fmt.Print(sigma)
+		return img, fmt.Errorf("Error sigma should above 0")
+	}
+
+	// kernelSize := 6*sigma + 1
+	kernelSize := int(2*math.Ceil(3*sigma) + 1) // Find The Corresping Size | How Blur The Image Are
+	kernelGapFromCenter := int(math.Floor(float64(kernelSize) / 2)) // The Gap From 0 to Inf
 
 	kernelConvolution := allocNewArray[float64](kernelSize, kernelSize)
 
-	// fmt.Printf("%d \n\n", kernelSize)
+	// fmt.Println(kernelGapFromCenter)
 	sum := 0.0
+	preCalculatedGaussianLeftFunc := 1 / (2 * math.Pi * math.Pow(sigma, 2)) 
+	preExponentCalculation := 2.0*math.Pow(sigma,2) 
 
 	for x := 0; x < kernelSize; x++ {
 		for y := 0; y < kernelSize; y++ {
@@ -139,13 +149,13 @@ func GaussianBlur(img *image.Gray, sigma float64) *image.Gray {
 
 			// fmt.Printf("%d, %d \n", xGap, yGap)
 
-			gaussianFuncLeftSide := 1 / (2 * math.Pi * math.Pow(sigma, 2))
-
 			power := -(math.Pow(float64(xGap), 2) + math.Pow(float64(yGap), 2))
 
-			gaussianFuncRightSize := math.Pow(math.E, power/2*math.Pow(sigma, 2))
+			exponent := power/preExponentCalculation
 
-			gaussianFuncResult := gaussianFuncLeftSide * gaussianFuncRightSize
+			gaussianFuncRightSize := math.Pow(math.E, exponent)
+
+			gaussianFuncResult := preCalculatedGaussianLeftFunc * gaussianFuncRightSize
 
 			kernelConvolution[x][y] = gaussianFuncResult
 
@@ -153,17 +163,47 @@ func GaussianBlur(img *image.Gray, sigma float64) *image.Gray {
 		}
 	}
 
-	fmt.Printf("Kernel %v \n", kernelConvolution)
-	fmt.Printf("Sum %.10f \n", sum)
-	
-	if sum != 1.0 {
-		log.Println("Do Normalaization To Make Sure it stays 1")
-		log.Fatal("the weight distribution for Gaussian Function is not equal 1 it means is not balance at all")
+	sum = normalizationKernelGaussion(sum, kernelConvolution)
+
+	// Edge Padding
+	paddedImg := utils.AddEdgePaddingExtenstion(img, kernelGapFromCenter, kernelGapFromCenter)
+
+	newImg := image.NewGray(img.Bounds())
+	for y := 0 + kernelGapFromCenter; y < paddedImg.Bounds().Dy() - kernelGapFromCenter; y++ {
+		for x := 0 + kernelGapFromCenter; x < paddedImg.Bounds().Dx() - kernelGapFromCenter; x++ {
+ 
+			sumPixel := 0.0
+			
+			for kernelX := 0; kernelX  < len(kernelConvolution); kernelX++ {
+				for kernelY := 0; kernelY < len(kernelConvolution[kernelX]); kernelY++ {
+					colorGray := paddedImg.GrayAt(x - kernelGapFromCenter + kernelX, y-kernelGapFromCenter + kernelY).Y
+					
+					// fmt.Println(kernelConvolution[kernelX][kernalY])
+					appliedKernel := float64(colorGray) * kernelConvolution[kernelX][kernelY]
+					sumPixel += appliedKernel
+				}
+			}
+
+			clr := color.Gray{
+				Y: utils.ClampUint8(sumPixel, 0.0, 255.0),
+			}
+			newImg.Set(x - kernelGapFromCenter, y - kernelGapFromCenter, clr)
+		}
 	}
 
-	// fmt.Printf("Sum %.2f \n", sum)
+	return newImg, nil
+}
 
-	// Edge Padding ??
-	paddedImg := utils.AddEdgePaddingExtenstion(img, kernelGapFromCenter, kernelGapFromCenter)
-	return paddedImg
+func normalizationKernelGaussion(sum float64, kernelConvolution [][]float64) float64 {
+
+	newSum := 0.0
+
+	for y := range kernelConvolution {
+		for x := range kernelConvolution[y] {
+			kernelConvolution[x][y] = kernelConvolution[x][y] / sum
+			newSum += kernelConvolution[x][y]
+		}
+	}
+
+	return newSum
 }

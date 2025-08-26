@@ -32,8 +32,10 @@ func getTerminalSize() (int, int, error) {
 
 func main() {
 	var filePath string
+	var sigmaVariance float64
 
 	flag.StringVar(&filePath, "i", "", "Image To Process")
+	flag.Float64Var(&sigmaVariance, "sigma", 0, "Smooth Blur")
 
 	flag.Parse()
 
@@ -72,17 +74,21 @@ func main() {
 
 	utils.OutputImageForDebugResult(newImageSet, "./img/greyResult.jpg")
 
-	// newImageSet = core.GaussianBlur(newImageSet, 1)
-	//
-	// utils.OutputImageForDebugResult(newImageSet, "./img/gaussianBlurResult.jpg")
-	// return
+	newImageSet, err = core.GaussianBlur(newImageSet, sigmaVariance)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	utils.OutputImageForDebugResult(newImageSet, "./img/gaussianBlurResult.jpg")
+	
 	edgeImg := core.EdgeDetection(*newImageSet)
 
 	utils.OutputImageForDebugResult(edgeImg, "./img/edgeDetectionResult.jpg")
 
-	widthDivisor := float64(bounds.Bounds().Max.X) / float64(w*2)
+	widthDivisor := float64(bounds.Bounds().Max.X) / float64(w)
 
-	heightDivisor := float64(bounds.Bounds().Max.Y) / float64(h)
+	heightDivisor := float64(bounds.Bounds().Max.Y) / float64(h*2)
 
 	finalDivisor := math.Round(max(widthDivisor, heightDivisor))
 
@@ -92,8 +98,8 @@ func main() {
 		bounds.Bounds().Max.Y/int(finalDivisor),
 	)
 
-	utils.OutputImageForDebugResult(newImageSet, "./img/scaleResult.jpg")
-
+	utils.OutputImageForDebugResult(newImageSet, "./img/ScaleResult.jpg")
+	// return
 	edgeImg = core.MaxPoolingGray(
 		edgeImg,
 		bounds.Bounds().Max.X/int(finalDivisor),
