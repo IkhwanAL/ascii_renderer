@@ -86,7 +86,7 @@ func main() {
 
 	utils.OutputImageForDebugResult(edgeImg, "./img/edgeDetectionResult.jpg")
 
-	widthDivisor := float64(bounds.Bounds().Max.X) / float64(w)
+	widthDivisor := float64(bounds.Bounds().Max.X) / float64(w*2)
 
 	heightDivisor := float64(bounds.Bounds().Max.Y) / float64(h*2)
 
